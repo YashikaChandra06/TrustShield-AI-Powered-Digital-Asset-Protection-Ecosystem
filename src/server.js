@@ -13,6 +13,9 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 
+// Serve static files from the React frontend app
+app.use(express.static(path.join(__dirname, '../client/dist')));
+
 // Routes
 const assetRoutes = require('./routes/assets');
 const auditLogsRoutes = require('./routes/auditLogs');
@@ -28,19 +31,10 @@ app.get('/api/protected', authenticateToken, (req, res) => {
     res.json({ message: 'This is protected data!', user: req.user });
 });
 
-// Serve frontend in production
-if (process.env.NODE_ENV === 'production') {
-    app.use(express.static(path.join(__dirname, '../client/dist')));
-    
-    app.get('*', (req, res) => {
-        res.sendFile(path.join(__dirname, '../client/dist/index.html'));
-    });
-} else {
-    app.get('/', (req, res) => {
-        res.json({ message: 'TrustShield Backend API is running' });
-    });
-}
-
+// Any request that doesn't match an API route should serve the React app
+app.use((req, res) => {
+    res.sendFile(path.join(__dirname, '../client/dist/index.html'));
+});
 // Start Server
 if (require.main === module) {
     app.listen(PORT, () => {

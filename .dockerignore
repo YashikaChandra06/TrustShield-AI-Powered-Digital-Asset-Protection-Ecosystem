@@ -1,9 +1,7 @@
 node_modules
 client/node_modules
-client/dist
 .env
-.git
-.gitignore
-README.md
+uploads/*
 database.sqlite
-uploads/
+.git
+client/dist

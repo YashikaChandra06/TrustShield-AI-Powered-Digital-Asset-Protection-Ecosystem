@@ -1,28 +1,23 @@
-FROM node:20-alpine AS build
-
-# Build frontend
-WORKDIR /app/client
-COPY client/package*.json ./
-RUN npm install
-COPY client/ ./
-RUN npm run build
-
-# Build backend
 FROM node:20-alpine
+
 WORKDIR /app
+
+# Copy package.json files
 COPY package*.json ./
-RUN npm install --production
-COPY src/ ./src/
-COPY --from=build /app/client/dist ./client/dist
+COPY client/package*.json ./client/
 
-# Ensure the database directory exists and is writable
-RUN mkdir -p ./src/db
-# We might need sqlite3 installed, it's in dependencies
+# Install dependencies
+RUN npm install
+RUN cd client && npm install
 
-# Set environment to production
-ENV NODE_ENV=production
-ENV PORT=8080
+# Copy application files
+COPY . .
 
-EXPOSE 8080
+# Build the frontend
+RUN cd client && npm run build
 
+# Expose port
+EXPOSE 3000
+
+# Start the server
 CMD ["node", "src/server.js"]
